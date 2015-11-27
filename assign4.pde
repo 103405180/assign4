@@ -391,17 +391,13 @@ void draw(){
          }
        break;
    }
+   
      //hp range
      if (hpX>=194){
        hpX=194;
      }else if(hpX<=0){
        gameState=GAME_OVER;  
-      }      //hp range
-     if (hpX>=194){
-       hpX=194;
-     }else if(hpX<=0){
-       gameState=GAME_OVER;  
-      } 
+      }  
   }
 
 void keyPressed(){
