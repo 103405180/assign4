@@ -394,7 +394,12 @@ void draw(){
      //hp range
      if (hpX>=194){
        hpX=194;
-     }else if(hpX<=0){
+     }else if(hpX<1){
+       gameState=GAME_OVER;  
+      } 
+     if (hpX>=194){
+       hpX=194;
+     }else if(hpX<1){
        gameState=GAME_OVER;  
       } 
   }
