@@ -9,11 +9,13 @@ float hpX=38.8;    //10hp=19.4, 20hp=38.8, 100hp=194
 float fighterX=589, fighterY=240;
 float treasureX=random(45,585),treasureY=random(45,405); 
 float enemyX=0, enemyY=random(0,420);
+int shootNbr=0;
 final float spacingX=70, spacingY=40;
-float shootNbr=5;
 
-float [] shootXArray = new float [5];
-float [] shootYArray = new float [5];
+float [] shootX = new float [5];
+float [] shootY = new float [5];
+float [] shootX1 = new float [8];
+float [] shootY1 = new float [8];
 
 float [] enemyXArray = new float [5];
 float [] enemyYArray = new float [5];
@@ -29,8 +31,10 @@ boolean [] animation1 = new boolean [5];
 boolean [] animation2 = new boolean [5];
 boolean [] animation3 = new boolean [8];
 
-boolean [] shootAppear = new boolean [5];
+boolean [] shootAviable = new boolean [5];
 boolean [] shootDetect = new boolean [5];
+boolean [] shootAviable1 = new boolean [8];
+boolean [] shootDetect1 = new boolean [8];
 
 int [] current1Frame = new int [5];
 int [] current2Frame = new int [5];
@@ -61,6 +65,16 @@ void setup(){
   for (int i=0; i<5; i++){
     images[i] = loadImage("img/flame"+(i+1)+".png");
   }
+  
+  for(int i=0; i<5; i++){
+    shootAviable[i]=false;
+    shootDetect[i]=false;
+  }
+  for(int i=0; i<8; i++){
+    shootAviable1[i]=false;
+    shootDetect1[i]=false;
+  }  
+
 }
 
 void draw(){
@@ -103,12 +117,6 @@ void draw(){
    }
    image(fighterImg,fighterX,fighterY);
 
-   //hp range
-   if (hpX>=194){
-     hpX=194;
-   }else if(hpX<1){
-     gameState=GAME_OVER;  
-    }
 
    //eating treasure
    if(fighterX > treasureX-fighterImg.width && fighterX < treasureX+treasureImg.width && fighterY > treasureY-fighterImg.height && fighterY < treasureY+treasureImg.height){
@@ -116,8 +124,20 @@ void draw(){
      treasureX=random(45,585);
      treasureY=random(45,405);
    }
+   
+   //shooting
+   for(int i = 0; i<5; i++){
+     if(shootAviable[i] == true){
+       image (shootImg, shootX[i]-=5, shootY[i]);
+       if(shootX[i] < 0){
+         shootY[i]=1000;
+         shootAviable[i] = false;
+       }
+     }
+   }
 
    switch(gameState){
+     
      case GAME_START:
      image(start2Img,0,0);
      if(mouseX>=210 && mouseX<=440 && mouseY>=380 && mouseY<=410){
@@ -131,14 +151,7 @@ void draw(){
      case GAME_RUN_LINE:
      
      enemyX+=3;    
-              
-     if (enemyX-4*spacingX > width){
-       gameState=GAME_RUN_SLASH;
-       enemyX=0;
-       enemyY=random(0,255);
 
-     }
-     
      for(int i=0; i<5; i++){
 
        if(enemy1Detect[i]==false){
@@ -151,8 +164,21 @@ void draw(){
            enemy1Detect[i]=true;
            animation1[i] = true;
          }
+         
+         if(shootX[i]>enemyXArray[i]-shootImg.width && shootX[i]<enemyXArray[i]+enemyImg.width
+         && shootY[i]>enemyYArray[i]-shootImg.height && shootY[i]<enemyYArray[i]+enemyImg.height
+         ){
+           enemy1Detect[i]=true;
+           animation1[i]=true;
+           shootDetect[i]=true;
+         }
        }
        
+       if(shootDetect[i]==true){
+         shootY[i]=1000;
+         shootDetect[i]=false;
+       }
+
        if(animation1[i]==true){
          
          if(frameCount % floor((60/10)) == 0){
@@ -170,18 +196,20 @@ void draw(){
        image(enemyImg,enemyXArray[i],enemyYArray[i]);
      } 
      
+     if (enemyX-4*spacingX > width){
+       gameState=GAME_RUN_SLASH;
+       enemyX=0;
+       enemyY=random(0,255);
+
+     }     
+     
      break;
      
      case GAME_RUN_SLASH:
 
      enemyX+=3;
-     
-     if (enemyX-4*spacingX > width){
-       gameState = GAME_RUN_DIAMOND;
-       enemyX=0;
-       enemyY=random(80,335);
-     }
-     
+     //hp range
+    
      for(int i=0; i<5; i++){
 
        if(enemy2Detect[i]==false){
@@ -194,10 +222,22 @@ void draw(){
            hpX-=38.8;
            enemy2Detect[i] = true;
            animation2[i] = true;
-           
+         }
+         
+         if(shootX[i]>enemyXArray[i]-shootImg.width && shootX[i]<enemyXArray[i]+enemyImg.width
+         && shootY[i]>enemyYArray[i]-shootImg.height && shootY[i]<enemyYArray[i]+enemyImg.height
+         ){
+           enemy2Detect[i]=true;
+           animation2[i]=true;
+           shootDetect[i]=true;
          }
        }
        
+       if(shootDetect[i]==true){
+         shootY[i]=1000;
+         shootDetect[i]=false;
+       }         
+
        if(animation2[i]==true){
            
          if(frameCount % floor((60/10)) == 0){
@@ -214,7 +254,21 @@ void draw(){
 
        image(enemyImg,enemyXArray[i],enemyYArray[i]);
      } 
-
+    
+     if (enemyX-4*spacingX > width){
+       gameState = GAME_RUN_DIAMOND;
+       enemyX=0;
+       enemyY=random(80,335); 
+       for(int i = 0; i<8; i++){
+         if(shootAviable1[i] == true){
+           image (shootImg, shootX1[i]-=5, shootY1[i]);
+           if(shootX1[i] < 0){
+             shootY1[i]=1000;
+             shootAviable1[i] = false;
+           }
+         }
+   }       
+     }
 
 
      break;
@@ -222,33 +276,7 @@ void draw(){
      case GAME_RUN_DIAMOND:
      
      enemyX+=3;
-     
-     if (enemyX-4*spacingX > width){
-       gameState = GAME_RUN_LINE;
-       enemyX=0;
-       enemyY=random(0,420);
-
-       enemyXArray = new float [5];
-       enemyYArray = new float [5];
-        
-       enemyX1Array = new float [8];
-       enemyY1Array = new float [8];
-        
-       enemy1Detect = new boolean [5];
-       enemy2Detect = new boolean [5];
-       enemy3Detect = new boolean [8];
-        
-       animation1 = new boolean [5];
-       animation2 = new boolean [5];
-       animation3 = new boolean [8];
-        
-       current1Frame = new int [5];
-       current2Frame = new int [5];
-       current3Frame = new int [8];
-       
-     }
-     
-     
+    
      for(int i=0; i<8; i++){
 
        if(enemy3Detect[i]==false){
@@ -266,9 +294,20 @@ void draw(){
            hpX-=38.8;
            enemy3Detect[i]=true;
            animation3[i] = true;
-           
          }
-       }
+         if(shootX1[i]>enemyX1Array[i]-shootImg.width && shootX1[i]<enemyX1Array[i]+enemyImg.width
+         && shootY1[i]>enemyY1Array[i]-shootImg.height && shootY1[i]<enemyY1Array[i]+enemyImg.height
+         ){
+           enemy3Detect[i]=true;
+           animation3[i]=true;
+           shootDetect1[i]=true;
+         }         
+       }  
+       
+       if(shootDetect1[i]==true){
+         shootY1[i]=1000;
+         shootDetect1[i]=false;
+       }        
        
        if(animation3[i]==true){
          
@@ -276,7 +315,6 @@ void draw(){
            current3Frame[i]++;
          }
          if(current3Frame[i]<5){
-           
            if(i>4){
              image(images[current3Frame[i]],enemyX-(i-4)*spacingX,enemyY+(2-abs(i-6))*spacingY);
            }else{
@@ -290,7 +328,27 @@ void draw(){
        }
 
        image(enemyImg,enemyX1Array[i],enemyY1Array[i]);
-     }  
+     } 
+     
+     if (enemyX-4*spacingX > width){
+       gameState = GAME_RUN_LINE;
+       enemyX=0;
+       enemyY=random(0,420);
+       enemyXArray = new float [5];
+       enemyYArray = new float [5];  
+       enemyX1Array = new float [8];
+       enemyY1Array = new float [8];       
+       enemy1Detect = new boolean [5];
+       enemy2Detect = new boolean [5];
+       enemy3Detect = new boolean [8];
+       animation1 = new boolean [5];
+       animation2 = new boolean [5];
+       animation3 = new boolean [8];
+       current1Frame = new int [5];
+       current2Frame = new int [5];
+       current3Frame = new int [8];
+       
+     }     
 
      break;
      
@@ -311,30 +369,39 @@ void draw(){
             enemyY=random(0,420);
             enemyX=0;
             enemyY=random(0,420);
-    
             enemyXArray = new float [5];
-            enemyYArray = new float [5];
-            
+            enemyYArray = new float [5]; 
             enemyX1Array = new float [8];
             enemyY1Array = new float [8];
-            
             enemy1Detect = new boolean [5];
             enemy2Detect = new boolean [5];
-            enemy3Detect = new boolean [8];
-            
+            enemy3Detect = new boolean [8];         
             animation1 = new boolean [5];
             animation2 = new boolean [5];
-            animation3 = new boolean [8];
-            
+            animation3 = new boolean [8];           
             current1Frame = new int [5];
             current2Frame = new int [5];
             current3Frame = new int [8];
+            for (int i=0; i<5; i++){
+              shootAviable[i]=false;
+              shootDetect[i]=false;
+            }
 
            } 
          }
        break;
    }
-
+     //hp range
+     if (hpX>=194){
+       hpX=194;
+     }else if(hpX<=0){
+       gameState=GAME_OVER;  
+      }      //hp range
+     if (hpX>=194){
+       hpX=194;
+     }else if(hpX<=0){
+       gameState=GAME_OVER;  
+      } 
   }
 
 void keyPressed(){
@@ -352,17 +419,25 @@ void keyPressed(){
       case LEFT:
         leftPressed=true;
         break;
-
     }
   }
-
-
-  if (key == ' ') {
+  if ( keyCode == ' ' ){
     spacePressed=true;
-    shootXArray[0]=fighterX;
-    shootYArray[0]=fighterY;
+    if(gameState==1 || gameState==2 || gameState==3)
+     if(shootAviable[shootNbr]==false || shootAviable1[shootNbr]==false) {
+        shootAviable[shootNbr]=true;
+        shootAviable1[shootNbr]=true;
+        shootX[shootNbr]=fighterX;
+        shootY[shootNbr]=fighterY;
+        shootX1[shootNbr]=fighterX;
+        shootY1[shootNbr]=fighterY;        
+        shootNbr++;
+        if(shootNbr>4){
+          shootNbr=0;
+        }
+     }  
+   }
   }
-}
 
 void keyReleased(){
   if(key==CODED){
@@ -381,5 +456,4 @@ void keyReleased(){
        break;   
     }
   }
-
 }
